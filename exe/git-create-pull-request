@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+require_relative './pull_request'
+
+require 'pry-byebug'
+
+module GitScripts
+  class CreatePullRequest < PullRequest
+    def execute
+      GitHub.create_pull_request_url(branch)
+    end
+
+    private
+
+    def select_pull_request
+      result = gets.to_s.strip
+
+      if result.downcase == 'n' || result.downcase == 'new'
+        GitHub.create_pull_request_url(branch)
+      elsif (index = result.to_i) != 0
+        if index >= 1 && index <= my_pull_requests.size
+          my_pull_requests[result.to_i - 1].html_url
+        end
+      end
+    end
+  end
+end
+
+begin
+  url = GitScripts::CreatePullRequest.new.execute
+  `open #{url}`
+rescue StandardError => e
+  puts e
+end
