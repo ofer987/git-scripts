@@ -6,7 +6,7 @@ require_relative '../lib/git_scripts'
 module GitScripts
   class PullRequest
     def password
-      ENV['PAT']
+      ENV['GITHUB_TOKEN']
     end
 
     def username
