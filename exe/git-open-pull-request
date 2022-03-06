@@ -39,7 +39,14 @@ end
 
 begin
   url = GitScripts::OpenPullRequest.new.execute
-  `open #{url}` unless url.blank?
+  return if url.blank?
+
+  if /darwin/.match? RUBY_PLATFORM
+    `open #{url}`
+    return
+  end
+
+  puts url
 rescue StandardError => e
   puts e
 end
