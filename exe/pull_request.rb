@@ -6,11 +6,7 @@ require_relative '../lib/git_scripts'
 module GitScripts
   class PullRequest
     def password
-      return @password if defined? @password
-
-      path = File.absolute_path(__dir__)
-      path = File.join(path, '..', 'config', 'github.yaml')
-      @password = YAML.load_file(path)['PAT']
+      ENV['PAT']
     end
 
     def username
