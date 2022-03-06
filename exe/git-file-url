@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative './lib/git'
+
+def branch_name
+  return ARGV[0].strip if ARGV.size == 2
+
+  Git.branch_name
+end
+
+def path
+  specified_path =
+    if ARGV.size == 2
+      ARGV[1].strip
+    else
+      ARGV[0].strip
+    end
+
+  specified_path.gsub('~', ENV['HOME']) if specified_path[0] == '~'
+
+  specified_path
+end
+
+def relative_path(path)
+  if absolute_path? path
+    return Git.local_file_path(path)
+  end
+
+  return path
+end
+
+def absolute_path?(path)
+  path[0] == '/'
+end
+
+def file_url
+  "#{Git.repo_url}/blob/#{branch_name}#{relative_path(path)}"
+end
+
+puts file_url

@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative './lib/git'
+
+def branch_name
+  `git rev-parse --abbrev-ref HEAD`.chomp
+end
+
+def remote_name
+  (ARGV[0] || "").strip.to_s
+end
+
+`git reset --hard #{Git.remote_name(remote_name)}/#{branch_name}`

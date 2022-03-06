@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+class Issue
+  attr_reader :project, :id
+
+  def initialize(project, id)
+    self.project = project.to_s.strip.upcase
+    self.id = Integer(id)
+  end
+
+  def <=>(other)
+    if self.project == other.project
+      return self.id <=> other.id
+    end
+
+    self.project <=> other.project
+  end
+
+  def to_s
+    "#{self.project}-#{self.id}"
+  end
+
+  private
+
+  attr_writer :project, :id
+end
+
+def jira_issue
+  branch_name.match(JIRA_ISSUE_REGEX) || []
+end
+
+JIRA_ISSUE_REGEX = /([A-Za-z]+)-(\d+)/
+BASE_URL = URI('https://jira.thomsonreuters.com/browse')
+branch_name = `git rev-parse --abbrev-ref HEAD`
+
+jira_issue_matches = Array(branch_name.match(JIRA_ISSUE_REGEX))
+if jira_issue_matches.empty? || jira_issue_matches.size != 3
+  puts BASE_URL 
+
+  return
+end
+
+issue = Issue.new(jira_issue_matches[1], jira_issue_matches[2]) 
+uri = URI("#{BASE_URL}/#{issue}")
+
+puts uri

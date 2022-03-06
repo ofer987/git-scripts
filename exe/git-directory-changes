@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Set the remote (default: origin)
+# Either in an ENV variable
+# Or as the first parameter
+remote = (ENV['REMOTE'] || ARGV[0] || 'origin').strip
+
+# Set the target branch (default: master)
+# Either in an ENV variable
+# Or as the second parameter
+target_branch = (ENV['TARGET_BRANCH'] || ARGV[1] || 'master').strip
+
+changes = `git diff --name-only #{remote}/#{target_branch}`.split("\n")
+
+files_changed = changes
+  .map { |file| file.split(File::SEPARATOR) }
+  .select { |path| path.size == 1 }
+  .uniq
+  .sort
+
+directories_changed = changes
+  .map { |file| file.split(File::SEPARATOR) }
+  .select { |path| path.size > 1 }
+  .map(&:first)
+  .select { |directory| File.directory? directory }
+  .uniq
+  .sort
+  .map { |dir| "- `#{dir}`" }
+
+if (files_changed || []).size.positive?
+  puts (['- `ROOT`'] + directories_changed).join("\n")
+else
+  puts directories_changed.join("\n")
+end

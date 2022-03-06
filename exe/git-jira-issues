@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+class Issue
+  attr_reader :project, :id
+
+  def initialize(project, id)
+    self.project = project.to_s.strip.upcase
+    self.id = Integer(id)
+  end
+
+  def <=>(other)
+    if self.project == other.project
+      return self.id <=> other.id
+    end
+
+    self.project <=> other.project
+  end
+
+  def to_s
+    "#{self.project}-#{self.id}"
+  end
+
+  private
+
+  attr_writer :project, :id
+end
+
+lines = `git log --merges --pretty=oneline #{ARGV[0]}..HEAD;`
+
+issues = lines.split("\n")
+  .map { |line| line.match(/([A-Za-z]+)-(\d+)/) || [] }
+  .select { |items| items.size == 3 }
+  .map { |items| items[1..2] }
+  .map { |items| Issue.new(items[0], items[1]) }
+  .uniq { |issue| issue.to_s }
+  .sort
+
+puts issues.map(&:to_s)
