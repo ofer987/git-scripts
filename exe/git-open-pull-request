@@ -9,7 +9,7 @@ require 'pry-byebug'
 module GitScripts
   class OpenPullRequest < PullRequest
     def execute
-      return unless my_pull_requests
+      return unless Array(my_pull_requests).length.positive?
 
       return my_pull_requests.first.html_url if my_pull_requests.size == 1
 
@@ -21,7 +21,7 @@ module GitScripts
       end
 
       puts 'Enter number to edit existing Pull Request'
-      puts "Invalid input (enter between 1 to #{my_pull_requests.size})" while (line = select_pull_request).to_s.empty?
+      puts "Invalid input (enter between 1 to #{my_pull_requests.size})" while (line = select_pull_request).blank?
 
       puts line
     end
@@ -39,7 +39,7 @@ end
 
 begin
   url = GitScripts::OpenPullRequest.new.execute
-  `open #{url}`
+  `open #{url}` unless url.blank?
 rescue StandardError => e
   puts e
 end
