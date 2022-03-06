@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative './lib/git'
+require_relative '../lib/git_scripts'
 
 def branch_name
   return ARGV[0].strip if ARGV.size == 2

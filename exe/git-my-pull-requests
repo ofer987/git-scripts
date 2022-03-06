@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative './lib/git'
+require_relative '../lib/git_scripts'
 
 def my_pull_requests_url
   "#{Git.repo_url}/pulls/#{Git.username}"

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative './lib/git_scripts'
+require_relative '../lib/git_scripts'
 
 remote = (ARGV[0] || Git::DEFAULT_REMOTE).to_s.strip
 branch_name = (ARGV[1] || Git.branch_name).to_s.strip
