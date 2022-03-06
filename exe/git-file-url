@@ -23,11 +23,9 @@ def path
 end
 
 def relative_path(path)
-  if absolute_path? path
-    return Git.local_file_path(path)
-  end
+  return Git.local_file_path(path) if absolute_path? path
 
-  return path
+  "/#{path}"
 end
 
 def absolute_path?(path)
