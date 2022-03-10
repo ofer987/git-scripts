@@ -33,7 +33,7 @@ class GitHub
     end
 
     results
-      .select { |item| item.user.login == @username && item.head.ref == branch_name }
+      .select { |item| item.head.ref == branch_name }
       .sort_by(&:updated_at)
       .reverse
   end
