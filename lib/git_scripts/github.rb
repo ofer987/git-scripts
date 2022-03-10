@@ -7,7 +7,7 @@ class GitHub
     repos = `git remote -v`.chomp.split("\n")
 
     repos
-      .map { |item| REGEX.match(item) }
+      .map { |item| Array(REGEX.match(item)) }
       .filter { |item| item.size >= 2 }
       .map { |item| item[1] }
       .uniq
