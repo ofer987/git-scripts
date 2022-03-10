@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Git
+  PROJECT_REGEX = /([A-Za-z]-\d+)/
   DEFAULT_REMOTE = 'origin'
 
   def self.username
@@ -43,6 +44,10 @@ class Git
 
   def self.branch_name
     `git rev-parse --abbrev-ref HEAD`.chomp
+  end
+
+  def self.project_name
+    Array(PROJECT_REGEX.match(branch_name))[1].to_s.capitalize
   end
 
   def self.repo_directory
