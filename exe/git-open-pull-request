@@ -24,6 +24,8 @@ module GitScripts
       puts "Invalid input (enter between 1 to #{my_pull_requests.size})" while (line = select_pull_request).blank?
 
       puts line
+
+      line
     end
 
     private
