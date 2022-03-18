@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+module GitScripts
+  def open(url)
+    return false if url.blank?
+
+    if /darwin/.match? RUBY_PLATFORM
+      `open #{url}`
+    else 
+      puts url
+    end
+
+    true
+  end
+
+  url = OpenPullRequest.new.execute
+  exit 0 if open url
+
+  url = CreatePullRequest.new.execute
+  exit 0 if open url
+
+  exit 1
+end
