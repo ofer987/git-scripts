@@ -1,7 +1,4 @@
-#!/usr/bin/env ruby
 # frozen_string_literal: true
-
-require_relative '../lib/git_scripts'
 
 module GitScripts
   class PullRequest

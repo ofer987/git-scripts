@@ -3,24 +3,22 @@
 
 require_relative '../lib/git_scripts'
 
-module GitScripts
-  def open(url)
-    return false if url.blank?
+def open(url)
+  return false if url.blank?
 
-    if /darwin/.match? RUBY_PLATFORM
-      `open #{url}`
-    else 
-      puts url
-    end
-
-    true
+  if /darwin/.match? RUBY_PLATFORM
+    `open #{url}`
+  else 
+    puts url
   end
 
-  url = OpenPullRequest.new.execute
-  exit 0 if open url
-
-  url = CreatePullRequest.new.execute
-  exit 0 if open url
-
-  exit 1
+  true
 end
+
+url = GitScripts::OpenPullRequest.new.execute
+exit 0 if open url
+
+url = GitScripts::CreatePullRequest.new.execute
+exit 0 if open url
+
+exit 1
