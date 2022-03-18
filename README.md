@@ -1,38 +1,106 @@
-# Git::Scripts
+# Git+
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/git/scripts`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+The _missing_ `git` scripts
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'git-scripts'
+```bash
+bundle install
 ```
 
-And then execute:
+## Configuration
 
-    $ bundle install
+1. Create a Personal Authentication Token in GitHub with the `repo` permission. Assign it to the `GITHUB_TOKEN` environment variable. 
+2. (Optional) Set the default branch when **Creating a Pull Request** by setting the `init.defaultBranch` property in **Git Config**, otherwise it will assume `main` or `master` by default. Here is how to set it to `develop`,
 
-Or install it yourself as:
+```
+[init]
+  defaultBranch = develop
+```
 
-    $ gem install git-scripts
+## Scripts
 
-## Usage
+### 1. Checkout Pull Request
 
-TODO: Write usage instructions here
+Opens the branch's associated Pull Request. If none exist then it creates a new one.
 
-## Development
+```bash
+git checkout-pull-request
+```
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+### 2. File URL
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+Output the GitHub URL of the file-path
 
-## Contributing
+```bash
+git file-url [<branch>] <file-path>
+```
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/git-scripts.
+### 3. Directory Changes
+
+Output the root directories that have been modified
+
+```bash
+git directory-changes
+```
+
+### 4. Jira Issue
+
+Output the associated Jira Issue URL
+
+```bash
+git jira-issue
+```
+
+### 5. Git Jira Issues
+
+Output the associated Jira Issue URLs from `<commit-hash>`
+
+```bash
+git jira-issues <commit-hash>
+```
+
+### 6. My Pull Requests URL
+
+Output the URL of my Pull Requests
+
+```bash
+git my-pull-requests
+```
+
+### 7. Pull Request URL
+
+Output the Pull Requests URL
+
+```bash
+git pull-requests
+```
+
+### 8. Remote Reset
+
+Reset to the branch's remote branch
+
+```bash
+git remote-reset
+```
+
+### 9. Repository URL
+
+Output the remote URL
+
+```bash
+git repo
+```
+
+### 10. Reset Branch
+
+Reset the branch to the `<remote>`'s `<branch>`.
+If `<remote>` is not set then assume `origin`
+If `<branch>` is not set then assume the same branch
+
+```bash
+git reset-branch [<remote> <branch>]
+```
 
 ## License
 
