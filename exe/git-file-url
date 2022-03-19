@@ -6,7 +6,7 @@ require_relative '../lib/git_scripts'
 def branch_name
   return ARGV[0].strip if ARGV.size == 2
 
-  Git.branch_name
+  GitScripts::Git.branch_name
 end
 
 def path
@@ -23,7 +23,7 @@ def path
 end
 
 def relative_path(path)
-  return Git.local_file_path(path) if absolute_path? path
+  return GitScripts::Git.local_file_path(path) if absolute_path? path
 
   "/#{path}"
 end
@@ -33,7 +33,7 @@ def absolute_path?(path)
 end
 
 def file_url
-  "#{Git.repo_url}/blob/#{branch_name}#{relative_path(path)}"
+  "#{GitScripts::Git.repo_url}/blob/#{branch_name}#{relative_path(path)}"
 end
 
 puts file_url

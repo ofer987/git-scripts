@@ -4,7 +4,7 @@
 require_relative '../lib/git_scripts'
 
 def pull_requests_url
-  "#{Git.repo_url}/pulls"
+  "#{GitScripts::Git.repo_url}/pulls"
 end
 
 puts pull_requests_url

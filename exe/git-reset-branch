@@ -3,7 +3,7 @@
 
 require_relative '../lib/git_scripts'
 
-remote = (ARGV[0] || Git::DEFAULT_REMOTE).to_s.strip
-branch_name = (ARGV[1] || Git.branch_name).to_s.strip
+remote = (ARGV[0] || GitScripts::Git::DEFAULT_REMOTE).to_s.strip
+branch_name = (ARGV[1] || GitScripts::Git.branch_name).to_s.strip
 
 `git reset --hard #{remote}/#{branch_name}`
