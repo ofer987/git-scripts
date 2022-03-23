@@ -33,7 +33,7 @@ def absolute_path?(path)
 end
 
 def file_url
-  "#{GitScripts::Git.repo_url}/blob/#{branch_name}#{relative_path(path)}"
+  "#{GitScripts::Git.repo_url}/blob/#{branch_name}#{relative_path(path)}".chomp
 end
 
 puts file_url
