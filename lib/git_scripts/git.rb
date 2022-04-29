@@ -24,19 +24,15 @@ module GitScripts
     def self.repo_url
       url = origin_url
 
-      if %r{\.git$}.match? url
-        url = url.gsub(%r{\.git}, '')
-      end
+      url = url.gsub(/\.git/, '') if /\.git$/.match? url
 
-      if %r{^https://}.match? url
-        return url
-      elsif %r{^git\@}.match? url
-        url = url
-          .gsub(%r{^git\@}, 'https://')
-          .gsub(%r{(https://.*):(.*)\/(.*)}, "\\1/\\2/\\3")
-      else
-        raise "Sorry, but #{url} is not valid"
-      end
+      return url if %r{^https://}.match? url
+
+      raise "Sorry, but #{url} is not valid" unless /^git@/.match? url
+
+      url
+        .gsub(/^git@/, 'https://')
+        .gsub(%r{(https://.*):(.*)/(.*)}, '\\1/\\2/\\3')
     end
 
     def self.github_repo
