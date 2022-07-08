@@ -58,5 +58,12 @@ module GitScripts
     def self.merge_branch_name
       `git config --get init.defaultBranch`.chomp || 'master'
     end
+
+    def self.sorted_branches
+      # `git for-each-ref --sort=-committerdate refs/heads | cut -d\t -f 2 | sed -E 's/refs\\/heads\\/(.+)$/\\1/'`
+      `git for-each-ref --sort=-committerdate refs/heads`.split("\n")
+        .map { |line| line.split("\t")[1] }
+        .map { |value| value.gsub('refs/heads/', '') }
+    end
   end
 end
