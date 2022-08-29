@@ -48,7 +48,9 @@ module GitScripts
         max_pages.times.each do |page|
           @client.pull_requests(item, state: 'closed', page:, per_page: max_page_count)
             .each do |pull_request|
-              results << pull_request if @client.pull_request_merged?(item, pull_request.number)
+              if pull_request.base.ref == 'develop' && @client.pull_request_merged?(item, pull_request.number)
+                results << pull_request
+              end
             end
         end
       end
