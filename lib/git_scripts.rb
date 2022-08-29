@@ -20,16 +20,6 @@ module GitScripts
   # Your code goes here...
 
   class PullRequest
-    def password
-      ENV['GITHUB_TOKEN']
-    end
-
-    def username
-      return @username if defined? @username
-
-      @username = Git.username
-    end
-
     def branch
       return @branch if defined? @branch
 
@@ -39,7 +29,7 @@ module GitScripts
     def my_pull_requests
       return @my_pull_requests if defined? @my_pull_requests
 
-      github = GitHub.new(username, password)
+      github = GitHub.new
       @my_pull_requests = github.my_pull_requests(branch)
     end
 

@@ -18,9 +18,9 @@ module GitScripts
       "https://github.com/#{GitHub.github_repos.first}/compare/#{Git.merge_branch_name}...#{branch_name}"
     end
 
-    def initialize(username, password)
-      @username = username
-      @password = password
+    def initialize
+      @username = Git.username
+      @password = Git.password
 
       @client = Octokit::Client.new(
         login: @username,

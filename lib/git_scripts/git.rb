@@ -9,6 +9,10 @@ module GitScripts
       `git config user.username`.strip
     end
 
+    def self.password
+      ENV['GITHUB_TOKEN']
+    end
+
     def self.remote_name(name)
       name = name.to_s.strip
 

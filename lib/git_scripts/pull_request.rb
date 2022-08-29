@@ -2,35 +2,28 @@
 
 module GitScripts
   class PullRequest
-    def password
+    def self.password
       ENV['GITHUB_TOKEN']
     end
 
-    def username
-      return @username if defined? @username
-
-      @username = Git.username
+    def self.username
+      Git.username
     end
 
-    def branch
-      return @branch if defined? @branch
-
-      @branch = ARGV[0] || Git.branch_name
+    def self.branch
+      ARGV[0] || Git.branch_name
     end
 
-    def my_pull_requests
-      return @my_pull_requests if defined? @my_pull_requests
+    def self.open_pull_requests
+      GitHub.new(username, password)
 
+      github.open_pull_requests(branch)
+    end
+
+    def self.my_pull_requests
       github = GitHub.new(username, password)
-      @my_pull_requests = github.my_pull_requests(branch)
+
+      github.my_pull_requests(branch)
     end
-
-    def execute
-      throw NotImplementedError
-    end
-
-    protected
-
-    def initialize; end
   end
 end
