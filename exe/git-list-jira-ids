@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+def list_pull_requests
+  GitScripts::GitHub.new.jira_ids
+end
+
+puts list_pull_requests.join("\n")

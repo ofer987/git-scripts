@@ -38,5 +38,29 @@ module GitScripts
         .sort_by(&:updated_at)
         .reverse
     end
+
+    def open_pull_requests
+      # Add paging
+      # page: i, per_page: max_page_count
+      results = GitHub.github_repos.flat_map do |item|
+        @client.pull_requests(item, state: 'open')
+      end
+
+      # binding.pry
+
+      results
+        .sort_by(&:updated_at)
+        .reverse
+    end
+
+    def jira_ids
+      open_pull_requests
+        .map(&:title)
+        .map(&:to_s)
+        .map { |title| Models::Jira.init_from_github_title(title) }
+        .reject(&:nil?)
+        .sort
+        .uniq(&:title)
+    end
   end
 end

@@ -16,6 +16,8 @@ module GitScripts
   require_relative 'git_scripts/open_pull_request'
   require_relative 'git_scripts/create_pull_request'
 
+  require_relative 'git_scripts/models/jira'
+
   class Error < StandardError; end
   # Your code goes here...
 
