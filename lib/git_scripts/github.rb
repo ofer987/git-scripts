@@ -39,14 +39,19 @@ module GitScripts
         .reverse
     end
 
-    def open_pull_requests
-      # Add paging
-      # page: i, per_page: max_page_count
-      results = GitHub.github_repos.flat_map do |item|
-        @client.pull_requests(item, state: 'open')
-      end
+    def merged_pull_requests
+      results = []
+      max_pages = 2
+      max_page_count = 100
 
-      # binding.pry
+      GitHub.github_repos.flat_map do |item|
+        max_pages.times.each do |page|
+          @client.pull_requests(item, state: 'closed', page:, per_page: max_page_count)
+            .each do |pull_request|
+              results << pull_request if @client.pull_request_merged?(item, pull_request.number)
+            end
+        end
+      end
 
       results
         .sort_by(&:updated_at)
@@ -54,7 +59,7 @@ module GitScripts
     end
 
     def jira_ids
-      open_pull_requests
+      merged_pull_requests
         .map(&:title)
         .map(&:to_s)
         .map { |title| Models::Jira.init_from_github_title(title) }
