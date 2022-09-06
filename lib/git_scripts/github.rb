@@ -39,16 +39,18 @@ module GitScripts
         .reverse
     end
 
-    def merged_pull_requests
+    def merged_pull_requests(jira_title, options = {})
       results = []
-      max_pages = 2
-      max_page_count = 100
+      max_pages = options[max_pages] || 2
+      max_page_count = options[max_page_count] || 100
 
       GitHub.github_repos.flat_map do |item|
         max_pages.times.each do |page|
           @client.pull_requests(item, state: 'closed', page:, per_page: max_page_count)
             .each do |pull_request|
-              if pull_request.base.ref == 'develop' && @client.pull_request_merged?(item, pull_request.number)
+              if pull_request.base.ref == 'develop' &&
+                 pull_request.title.match?(/#{jira_title}/i) &&
+                 @client.pull_request_merged?(item, pull_request.number)
                 results << pull_request
               end
             end
@@ -56,8 +58,6 @@ module GitScripts
       end
 
       results
-        .sort_by(&:updated_at)
-        .reverse
     end
 
     def jira_ids
@@ -68,6 +68,10 @@ module GitScripts
         .reject(&:nil?)
         .sort
         .uniq(&:title)
+    end
+
+    def create_pull_request(repo, base, head, title, body)
+      @client.create_pull_request(repo, base, head, title, body)
     end
   end
 end

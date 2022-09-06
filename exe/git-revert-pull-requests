@@ -1,0 +1,108 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+class Logger
+  def self.puts(message)
+    @messages = [] unless defined? @messages
+    @messages << message.to_s
+  end
+
+  def self.to_s
+    @messages.join("\n")
+  end
+end
+
+def revert_pull_requests(jira_title)
+  # TODO: maybe send the token?
+  head = reversion_branch(jira_title)
+  create_branch(head)
+
+  Logger.puts "Created a reversion branch #{head}"
+
+  prs = GitScripts::GitHub.new.merged_pull_requests(jira_title)
+    .sort_by(&:merged_at)
+    .reverse
+
+  Logger.puts 'Reverting the following PRs (in descending order of merge date):'
+
+  prs
+    .each_with_index { |pr, index| Logger.puts "#{index}.\t#{pr.title}" }
+    .each { |pr| revert(pr) }
+
+  Logger.puts 'Opening Reversion Pull Request'
+  open_reversion_pull_request(jira_title)
+end
+
+def revert(pull_request)
+  execute "git cherry-pick -m 1 #{pull_request.merge_commit}"
+end
+
+def open_reversion_pull_request(jira_title, branch)
+  repo = 'https://github.com/tr/digital_emcm-web'
+  base = 'refs/heads/release'
+  head = "refs/heads/#{branch}"
+  title = title(jira_title)
+  message = body(jira_title, '')
+
+  result = GitScripts::GitHub.create_pull_request(repo, base, head, title, message)
+
+  Logger.puts "PR opened at #{result.html_url}"
+rescue StandardError => _e
+  Logger.puts "Failed to open PR for the branch #{branch}"
+end
+
+def title(jira_title)
+  "[#{jira_title}]: Reversion"
+end
+
+def body(jira_title, log)
+  <<~BODY
+    [#{jira_title}](https://jira.thomsonreuters.com/browse/#{jira_title}): Reversion
+
+    #{log}
+  BODY
+end
+
+def reversion_branch(jira_title)
+  "releases/cherry-picking/#{jira_title}/#{Random.rand(16)}"
+end
+
+def create_branch(head, base)
+  execute "git branch #{head} #{base}"
+end
+
+def checkout_branch(head)
+  execute "git checkout #{head}"
+end
+
+def execute(command)
+  Logger.puts "Attempting: #{command}"
+  `#{command}`
+  # or system command
+  # or exe command
+
+  Logger.puts 'Success!'
+rescue StandardError => _e
+  Logger.puts 'Failed! Try again manually'
+end
+
+JIRA_TITLE = ARGV[0]
+
+if JIRA_TITLE.blank?
+  puts 'The first argument should specify the Jira title'
+
+  exit 1
+end
+
+begin
+  revert_pull_requests(JIRA_TITLE)
+
+  puts Logger.to_s
+rescue StandardError => e
+  puts 'Failed to revert_pull_requests'
+  puts Logger.to_s
+
+  puts "Exception:\n#{e}"
+end
