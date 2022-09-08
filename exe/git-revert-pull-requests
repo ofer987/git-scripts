@@ -14,34 +14,33 @@ class Logger
   end
 end
 
-def revert_pull_requests(jira_title)
+def cherry_pick_pull_requests(jira_title)
   # TODO: maybe send the token?
-  head = reversion_branch(jira_title)
+  head = cherry_pick_branch(jira_title)
   create_branch(head)
 
-  Logger.puts "Created a reversion branch #{head}"
+  Logger.puts "Created a cherry-pick branch #{head}"
 
   prs = GitScripts::GitHub.new.merged_pull_requests(jira_title)
     .sort_by(&:merged_at)
-    .reverse
 
-  Logger.puts 'Reverting the following PRs (in descending order of merge date):'
+  Logger.puts 'Cherry-picking the following PRs (in ascending order of merge date):'
 
   prs
     .each_with_index { |pr, index| Logger.puts "#{index}.\t#{pr.title}" }
-    .each { |pr| revert(pr) }
+    .each { |pr| cherry_pick(pr) }
 
-  Logger.puts 'Opening Reversion Pull Request'
-  open_reversion_pull_request(jira_title)
+  Logger.puts 'Opening Cherry-pick Pull Request'
+  open_cherry_pick_pull_request(jira_title)
 end
 
-def revert(pull_request)
+def cherry_pick(pull_request)
   execute "git cherry-pick -m 1 #{pull_request.merge_commit}"
 end
 
-def open_reversion_pull_request(jira_title, branch)
+def open_cherry_pick_pull_request(jira_title, branch)
   repo = 'https://github.com/tr/digital_emcm-web'
-  base = 'refs/heads/release'
+  base = "refs/heads/#{RELEASE_BRANCH}"
   head = "refs/heads/#{branch}"
   title = title(jira_title)
   message = body(jira_title, '')
@@ -54,18 +53,18 @@ rescue StandardError => _e
 end
 
 def title(jira_title)
-  "[#{jira_title}]: Reversion"
+  "[#{jira_title}]: Cherry-pick in to #{}"
 end
 
 def body(jira_title, log)
   <<~BODY
-    [#{jira_title}](https://jira.thomsonreuters.com/browse/#{jira_title}): Reversion
+    [#{jira_title}](https://jira.thomsonreuters.com/browse/#{jira_title}): Cherry-pick into the #{RELEASE_BRANCH} Branch
 
     #{log}
   BODY
 end
 
-def reversion_branch(jira_title)
+def cherry_pick_branch(jira_title)
   "releases/cherry-picking/#{jira_title}/#{Random.rand(16)}"
 end
 
@@ -88,6 +87,7 @@ rescue StandardError => _e
   Logger.puts 'Failed! Try again manually'
 end
 
+RELEASE_BRANCH = 'release'
 JIRA_TITLE = ARGV[0]
 
 if JIRA_TITLE.blank?
@@ -97,11 +97,11 @@ if JIRA_TITLE.blank?
 end
 
 begin
-  revert_pull_requests(JIRA_TITLE)
+  cherry_pick_pull_requests(JIRA_TITLE)
 
   puts Logger.to_s
 rescue StandardError => e
-  puts 'Failed to revert_pull_requests'
+  puts 'Failed to Cherry-pick Pull Requests'
   puts Logger.to_s
 
   puts "Exception:\n#{e}"
