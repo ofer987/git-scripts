@@ -21,7 +21,8 @@ def cherry_pick_pull_requests(jira_title)
 
   Logger.puts "Created a cherry-pick branch #{head}"
 
-  prs = GitScripts::GitHub.new.merged_pull_requests(jira_title)
+  prs = GitScripts::GitHub.new
+    .merged_pull_requests(jira_title)
     .sort_by(&:merged_at)
 
   Logger.puts 'Cherry-picking the following PRs (in ascending order of merge date):'
@@ -53,7 +54,7 @@ rescue StandardError => _e
 end
 
 def title(jira_title)
-  "[#{jira_title}]: Cherry-pick in to #{}"
+  "[#{jira_title}]: Cherry-pick into the #{RELEASE_BRANCH} Branch"
 end
 
 def body(jira_title, log)
