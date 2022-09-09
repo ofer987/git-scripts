@@ -18,7 +18,7 @@ module GitScripts
       "https://github.com/#{GitHub.github_repos.first}/compare/#{Git.merge_branch_name}...#{branch_name}"
     end
 
-    def initialize(options)
+    def initialize(options = {})
       if !options.blank?
         @client = Octokit::Client.new(options)
       else
@@ -32,8 +32,10 @@ module GitScripts
       end
     end
 
-    def my_pull_requests(remote, branch_name)
-      @client.pull_requests(remote, state: 'open')
+    def my_pull_requests(branch_name)
+      results = GitHub.github_repos.flat_map do |item|
+        @client.pull_requests(item, state: 'open')
+      end
 
       results
         .select { |item| item.head.ref == branch_name }
@@ -46,26 +48,24 @@ module GitScripts
       max_pages = options[max_pages] || 2
       max_page_count = options[max_page_count] || 100
 
-      max_pages.times.each do |page|
-        page += 1
-
-        i = 1
-        # binding.pry
-        @client.pull_requests(remote, state: 'closed', page:, per_page: max_page_count)
-          .each do |pull_request|
-            if pull_request.base.ref == 'develop' &&
-               pull_request.title.match?(/#{jira_key}/i) &&
-               @client.pull_request_merged?(remote, pull_request.number)
-              results << pull_request
+      GitHub.github_repos.flat_map do |item|
+        max_pages.times.each do |page|
+          @client.pull_requests(item, state: 'closed', page:, per_page: max_page_count)
+            .each do |pull_request|
+              if pull_request.base.ref == 'develop' &&
+                 pull_request.title.match?(/#{jira_key}/i) &&
+                 @client.pull_request_merged?(item, pull_request.number)
+                results << pull_request
+              end
             end
-          end
+        end
       end
 
       results
     end
 
-    def jira_keys(remote)
-      merged_pull_requests(remote)
+    def jira_keys
+      merged_pull_requests
         .map(&:title)
         .map(&:to_s)
         .map { |title| Models::Jira.init_from_github_title(title) }

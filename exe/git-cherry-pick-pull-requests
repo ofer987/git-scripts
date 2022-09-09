@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require_relative '../lib/git_scripts'
-require 'pry-byebug'
 
 class Logger
   def self.puts(message)
@@ -15,12 +14,11 @@ class Logger
   end
 end
 
-def cherry_pick_pull_requests(jira_title)
-  # binding.pry
+def cherry_pick_pull_requests(jira_key)
   Logger.puts "## Actions\n"
 
   Logger.puts "### Create Cherry-picking branch\n"
-  head = create_branch(jira_title, RELEASE_BRANCH)
+  head = create_branch(jira_key, RELEASE_BRANCH)
 
   Logger.puts "### Checkout Cherry-picking branch\n"
   checkout_branch(head)
@@ -32,7 +30,7 @@ def cherry_pick_pull_requests(jira_title)
   add_empty_commit
 
   prs = GitScripts::GitHub.new(access_token: PAT)
-    .merged_pull_requests(REMOTE, jira_title)
+    .merged_pull_requests(REMOTE, jira_key)
     .sort_by(&:merged_at)
 
   Logger.puts "### Cherry-picking the following PRs (in ascending order of merge date):\n"
@@ -42,18 +40,12 @@ def cherry_pick_pull_requests(jira_title)
   prs
     .each_with_index { |pr, index| print_pull_request(pr.number, pr.title, pr.merge_commit_sha, index + 1) }
     .each_with_index { |pr, index| cherry_pick_pull_request(pr.number, pr.merge_commit_sha, index + 1) }
-  Logger.puts "\n"
 
-  Logger.puts '### Pushing to GitHub'
-  Logger.puts "\n"
-
+  Logger.puts "### Pushing to GitHub\n"
   push_branch(REMOTE, head)
-  Logger.puts "\n"
 
-  Logger.puts '### Opening Cherry-pick Pull Request'
-  Logger.puts "\n"
-
-  open_cherry_pick_pull_request(REMOTE, jira_title, head)
+  Logger.puts "### Opening Cherry-pick Pull Request\n"
+  open_cherry_pick_pull_request(REMOTE, jira_key, head)
 end
 
 def print_pull_request(number, title, merge_commit_sha, index)
@@ -72,11 +64,11 @@ def add_empty_commit
   execute 'git commit --allow-empty --no-verify -m "GitHub requires at least one commit in a Pull Request"'
 end
 
-def open_cherry_pick_pull_request(remote, jira_title, branch)
+def open_cherry_pick_pull_request(remote, jira_key, branch)
   base = "refs/heads/#{RELEASE_BRANCH}"
   head = "refs/heads/#{branch}"
-  title = title(jira_title)
-  message = body(jira_title)
+  title = title(jira_key)
+  message = body(jira_key)
 
   result = GitScripts::GitHub.new(access_token: PAT)
     .create_pull_request(remote, base, head, title, message)
@@ -87,30 +79,29 @@ rescue StandardError => _e
   Logger.puts "- Failed to open PR for the branch #{branch}\n"
 end
 
-def title(jira_title)
-  "[#{jira_title.upcase}]: Cherry-pick into the #{RELEASE_BRANCH} Branch"
+def title(jira_key)
+  "[#{jira_key.upcase}]: Cherry-pick into the #{RELEASE_BRANCH} Branch"
 end
 
-def body(jira_title)
+def body(jira_key)
   <<~BODY
-    [#{jira_title.upcase}](https://jira.thomsonreuters.com/browse/#{jira_title}) Cherry-pick into the #{RELEASE_BRANCH} Branch
+    [#{jira_key.upcase}](https://jira.thomsonreuters.com/browse/#{jira_key}) Cherry-pick into the #{RELEASE_BRANCH} Branch
 
     #{Logger}
   BODY
 end
 
-def cherry_pick_branch(jira_title)
-  "releases/cherry-picking/#{jira_title}/#{Random.rand(64)}"
+def cherry_pick_branch(jira_key)
+  "releases/cherry-picking/#{jira_key}/#{Random.rand(64)}"
 end
 
-def create_branch(jira_title, base)
-  head = cherry_pick_branch(jira_title)
-  # execute("git branch #{head} #{base}", throw_exception: true)
+def create_branch(jira_key, base)
+  head = cherry_pick_branch(jira_key)
   execute("git branch #{head} #{base}", throw_exception: true)
 
   head
 rescue StandardError => _e
-  create_branch(jira_title, base)
+  create_branch(jira_key, base)
 end
 
 def checkout_branch(head)
@@ -126,7 +117,7 @@ def push_branch(remote, head)
     git push "#{repository(remote, PAT)}" "#{head}:#{head}"
   COMMAND
 
-  execute(command, message:)
+  execute(command.chomp, message: message.chomp)
 end
 
 def execute(command, throw_exception: false, message: '')
@@ -147,17 +138,23 @@ end
 
 REMOTE = 'tr/digital_emcm-web'
 RELEASE_BRANCH = 'release'
-JIRA_TITLE = ARGV[0]
+JIRA_KEY = ARGV[0]
 PAT = ARGV[1]
 
-if JIRA_TITLE.blank?
-  puts 'The first argument should specify the Jira title'
+if JIRA_KEY.blank?
+  puts 'The first argument should specify the Jira key'
+
+  exit 1
+end
+
+if PAT.blank?
+  puts 'The second argument should be a GitHub Personal Access Token'
 
   exit 1
 end
 
 begin
-  cherry_pick_pull_requests(JIRA_TITLE)
+  cherry_pick_pull_requests(JIRA_KEY)
 
   puts Logger.to_s
 rescue StandardError => e
