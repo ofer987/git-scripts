@@ -1,0 +1,159 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+require 'pry-byebug'
+
+class Logger
+  def self.puts(message)
+    @messages = [] unless defined? @messages
+    @messages << message.to_s
+  end
+
+  def self.to_s
+    @messages.join("\n")
+  end
+end
+
+def cherry_pick_pull_requests(jira_title)
+  # binding.pry
+  Logger.puts "## Actions\n"
+
+  Logger.puts "### Create Cherry-picking branch\n"
+  head = create_branch(jira_title, RELEASE_BRANCH)
+
+  Logger.puts "### Checkout Cherry-picking branch\n"
+  checkout_branch(head)
+
+  Logger.puts 'Result:'
+  Logger.puts "Created and checked out a cherry-pick branch named, `#{head}`\n"
+
+  prs = GitScripts::GitHub.new(access_token: PAT)
+    .merged_pull_requests(REMOTE, jira_title)
+    .sort_by(&:merged_at)
+
+  Logger.puts "### Cherry-picking the following PRs (in ascending order of merge date):\n"
+
+  Logger.puts 'Number | Number | Title | Merge Commit SHA'
+  Logger.puts '--- | --- | --- | ---'
+  prs
+    .each_with_index { |pr, index| print_pull_request(pr.number, pr.title, pr.merge_commit_sha, index + 1) }
+    .each_with_index { |pr, index| cherry_pick_pull_request(pr.number, pr.merge_commit_sha, index + 1) }
+  Logger.puts "\n"
+
+  Logger.puts '### Pushing to GitHub'
+  Logger.puts "\n"
+
+  push_branch(REMOTE, head)
+  Logger.puts "\n"
+
+  Logger.puts '### Opening Cherry-pick Pull Request'
+  Logger.puts "\n"
+
+  open_cherry_pick_pull_request(REMOTE, jira_title, head)
+end
+
+def print_pull_request(number, title, merge_commit_sha, index)
+  Logger.puts "#{index} | Pull Request ##{number} | #{title} | #{merge_commit_sha}"
+end
+
+def cherry_pick_pull_request(number, merge_commit_sha, index)
+  Logger.puts "#### #{index}. Cherry-picking Pull Request ##{number}\n"
+
+  execute "git cherry-pick -m 1 #{merge_commit_sha}"
+end
+
+def open_cherry_pick_pull_request(remote, jira_title, branch)
+  base = "refs/heads/#{RELEASE_BRANCH}"
+  head = "refs/heads/#{branch}"
+  title = title(jira_title)
+  message = body(jira_title)
+
+  result = GitScripts::GitHub.new(access_token: PAT)
+    .create_pull_request(remote, base, head, title, message)
+
+  Logger.puts "PR opened at #{result.html_url}"
+  Logger.puts "- Success!\n"
+rescue StandardError => _e
+  Logger.puts "- Failed to open PR for the branch #{branch}\n"
+end
+
+def title(jira_title)
+  "[#{jira_title.upcase}]: Cherry-pick into the #{RELEASE_BRANCH} Branch"
+end
+
+def body(jira_title)
+  <<~BODY
+    [#{jira_title.upcase}](https://jira.thomsonreuters.com/browse/#{jira_title}) Cherry-pick into the #{RELEASE_BRANCH} Branch
+
+    #{Logger}
+  BODY
+end
+
+def cherry_pick_branch(jira_title)
+  "releases/cherry-picking/#{jira_title}/#{Random.rand(64)}"
+end
+
+def create_branch(jira_title, base)
+  head = cherry_pick_branch(jira_title)
+  # execute("git branch #{head} #{base}", throw_exception: true)
+  execute("git branch #{head} #{base}", throw_exception: true)
+
+  head
+rescue StandardError => _e
+  create_branch(jira_title, base)
+end
+
+def checkout_branch(head)
+  execute "git checkout #{head}"
+end
+
+def push_branch(remote, head)
+  message = <<~MESSAGE
+    git push "#{repository(remote, '***')}" "#{head}:#{head}"
+  MESSAGE
+
+  command = <<~COMMAND
+    git push "#{repository(remote, PAT)}" "#{head}:#{head}"
+  COMMAND
+
+  execute(command, message:)
+end
+
+def execute(command, throw_exception: false, message: '')
+  Logger.puts 'Attempting:'
+  Logger.puts "- `#{!message.blank? ? message : command}`"
+  system(command, exception: true)
+
+  Logger.puts "- Success!\n"
+rescue StandardError => e
+  Logger.puts "- Failed! Try again manually\n"
+
+  throw e if throw_exception
+end
+
+def repository(remote, personal_access_token)
+  "https://#{personal_access_token}@github.com/#{remote}.git"
+end
+
+REMOTE = 'tr/digital_emcm-web'
+RELEASE_BRANCH = 'release'
+JIRA_TITLE = ARGV[0]
+PAT = ARGV[1]
+
+if JIRA_TITLE.blank?
+  puts 'The first argument should specify the Jira title'
+
+  exit 1
+end
+
+begin
+  cherry_pick_pull_requests(JIRA_TITLE)
+
+  puts Logger.to_s
+rescue StandardError => e
+  puts 'Failed to Cherry-pick Pull Requests'
+  puts Logger.to_s
+
+  puts "Exception:\n#{e}"
+end

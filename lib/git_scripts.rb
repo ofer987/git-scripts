@@ -32,7 +32,7 @@ module GitScripts
       return @my_pull_requests if defined? @my_pull_requests
 
       github = GitHub.new
-      @my_pull_requests = github.my_pull_requests(branch)
+      @my_pull_requests = github.my_pull_requests('origin', branch)
     end
 
     def execute

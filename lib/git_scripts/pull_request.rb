@@ -23,7 +23,7 @@ module GitScripts
     def self.my_pull_requests
       github = GitHub.new(username, password)
 
-      github.my_pull_requests(branch)
+      github.my_pull_requests('origin', branch)
     end
   end
 end

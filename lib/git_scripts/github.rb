@@ -18,20 +18,22 @@ module GitScripts
       "https://github.com/#{GitHub.github_repos.first}/compare/#{Git.merge_branch_name}...#{branch_name}"
     end
 
-    def initialize
-      @username = Git.username
-      @password = Git.password
+    def initialize(options)
+      if !options.blank?
+        @client = Octokit::Client.new(options)
+      else
+        @username = Git.username
+        @password = Git.password
 
-      @client = Octokit::Client.new(
-        login: @username,
-        password: @password
-      )
+        @client = Octokit::Client.new(
+          login: @username,
+          password: @password
+        )
+      end
     end
 
-    def my_pull_requests(branch_name)
-      results = GitHub.github_repos.flat_map do |item|
-        @client.pull_requests(item, state: 'open')
-      end
+    def my_pull_requests(remote, branch_name)
+      @client.pull_requests(remote, state: 'open')
 
       results
         .select { |item| item.head.ref == branch_name }
@@ -39,39 +41,41 @@ module GitScripts
         .reverse
     end
 
-    def merged_pull_requests(jira_title, options = {})
+    def merged_pull_requests(remote, jira_key, options = {})
       results = []
       max_pages = options[max_pages] || 2
       max_page_count = options[max_page_count] || 100
 
-      GitHub.github_repos.flat_map do |item|
-        max_pages.times.each do |page|
-          @client.pull_requests(item, state: 'closed', page:, per_page: max_page_count)
-            .each do |pull_request|
-              if pull_request.base.ref == 'develop' &&
-                 pull_request.title.match?(/#{jira_title}/i) &&
-                 @client.pull_request_merged?(item, pull_request.number)
-                results << pull_request
-              end
+      max_pages.times.each do |page|
+        page += 1
+
+        i = 1
+        # binding.pry
+        @client.pull_requests(remote, state: 'closed', page:, per_page: max_page_count)
+          .each do |pull_request|
+            if pull_request.base.ref == 'develop' &&
+               pull_request.title.match?(/#{jira_key}/i) &&
+               @client.pull_request_merged?(remote, pull_request.number)
+              results << pull_request
             end
-        end
+          end
       end
 
       results
     end
 
-    def jira_ids
-      merged_pull_requests
+    def jira_keys(remote)
+      merged_pull_requests(remote)
         .map(&:title)
         .map(&:to_s)
         .map { |title| Models::Jira.init_from_github_title(title) }
         .reject(&:nil?)
         .sort
-        .uniq(&:title)
+        .uniq(&:key)
     end
 
-    def create_pull_request(repo, base, head, title, body)
-      @client.create_pull_request(repo, base, head, title, body)
+    def create_pull_request(repo, base, head, key, body)
+      @client.create_pull_request(repo, base, head, key, body)
     end
   end
 end

@@ -5,7 +5,7 @@ module GitScripts
     class Jira
       REGEX = /([A-Za-z]+)-(\d+)/
 
-      attr_reader :title
+      attr_reader :key
 
       class << self
         def init_from_github_title(title)
@@ -16,13 +16,13 @@ module GitScripts
         end
       end
 
-      def initialize(title)
-        @title = title.to_s
+      def initialize(key)
+        @key = key.to_s
       end
 
       def <=>(other)
-        first_part, second_part = Array(title.match(REGEX))[1..2]
-        other_first_part, other_second_part = Array(other.title.match(REGEX))[1..2]
+        first_part, second_part = Array(key.match(REGEX))[1..2]
+        other_first_part, other_second_part = Array(other.key.match(REGEX))[1..2]
 
         precedence = first_part <=> other_first_part
 
@@ -32,12 +32,12 @@ module GitScripts
       end
 
       def to_s
-        title
+        key
       end
 
       private
 
-      attr_writer :title
+      attr_writer :key
     end
   end
 end
