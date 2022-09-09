@@ -32,7 +32,7 @@ module GitScripts
       end
     end
 
-    def my_pull_requests(branch_name)
+    def pull_requests(branch_name)
       results = GitHub.github_repos.flat_map do |item|
         @client.pull_requests(item, state: 'open')
       end

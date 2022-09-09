@@ -28,11 +28,11 @@ module GitScripts
       @branch = ARGV[0] || Git.branch_name
     end
 
-    def my_pull_requests
-      return @my_pull_requests if defined? @my_pull_requests
+    def pull_requests
+      return @pull_requests if defined? @pull_requests
 
       github = GitHub.new
-      @my_pull_requests = github.my_pull_requests(branch)
+      @pull_requests = github.pull_requests(branch)
     end
 
     def execute
