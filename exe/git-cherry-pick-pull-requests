@@ -28,6 +28,9 @@ def cherry_pick_pull_requests(jira_title)
   Logger.puts 'Result:'
   Logger.puts "Created and checked out a cherry-pick branch named, `#{head}`\n"
 
+  Logger.puts "### Add Empty Commit\n"
+  add_empty_commit
+
   prs = GitScripts::GitHub.new(access_token: PAT)
     .merged_pull_requests(REMOTE, jira_title)
     .sort_by(&:merged_at)
@@ -61,6 +64,12 @@ def cherry_pick_pull_request(number, merge_commit_sha, index)
   Logger.puts "#### #{index}. Cherry-picking Pull Request ##{number}\n"
 
   execute "git cherry-pick -m 1 #{merge_commit_sha}"
+end
+
+def add_empty_commit
+  # In case that none of the cherry-picking succeeded
+  # GitHub requires at least one commit in a Pull Request
+  execute 'git commit --allow-empty --no-verify -m "GitHub requires at least one commit in a Pull Request"'
 end
 
 def open_cherry_pick_pull_request(remote, jira_title, branch)
