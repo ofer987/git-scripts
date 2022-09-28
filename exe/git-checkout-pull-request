@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'pry-byebug'
+
 require_relative '../lib/git_scripts'
 
-def open(url)
+def open_link(url)
   return false if url.blank?
 
   if /darwin/.match? RUBY_PLATFORM
@@ -15,10 +17,80 @@ def open(url)
   true
 end
 
-url = GitScripts::OpenPullRequest.new.execute
-exit 0 if open url
+def title(jira_key)
+  "[#{jira_key.upcase}]"
+end
 
-url = GitScripts::CreatePullRequest.new.execute
-exit 0 if open url
+def body(jira_key)
+  <<~BODY
+    [#{jira_key.upcase}](https://jira.thomsonreuters.com/browse/#{jira_key})
+
+    # Description
+
+    Please include a summary of the change and/or which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
+
+    ## Type of change
+
+    Please delete options that are not relevant,
+
+    - [ ] Is encapsulated by a Feature [Insert Feature Name]
+    - [ ] Bug fix (non-breaking change which fixes an issue)
+    - [ ] New feature (non-breaking change which adds functionality)
+    - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+    - [ ] This change requires a documentation update
+
+    ## Feature
+
+    Indicate the name of the Feature / Explain why the new code is _not_ encapsulated by a Feature
+
+    # Testing
+
+    # Checklist:
+
+    - [ ] My code follows the style guidelines of this project
+    - [ ] I have performed a self-review of my own code
+    - [ ] I have commented my code, particularly in hard-to-understand areas
+    - [ ] I have made corresponding changes to the documentation
+    - [ ] My changes generate no new warnings
+    - [ ] I have added tests that prove my fix is effective or that my feature works
+    - [ ] New and existing unit tests pass locally with my changes
+    - [ ] Any dependent changes have been merged and published in downstream modules
+
+    # Reviewers
+
+    - [ ] @
+    - [ ] @
+  BODY
+end
+
+def select_pull_request(pull_requests)
+  index = gets.to_i
+  return '' if index < 1 && index > pull_requests.size
+
+  pull_requests[index - 1].html_url
+end
+
+def existing_pull_requests(branch_name, base_branch)
+  GitScripts::GitHub.new
+    .pull_requests(branch_name, base_branch)
+end
+
+base = ARGV[1] || 'develop'
+head = GitScripts::Git.branch_name
+
+pull_requests = existing_pull_requests(head, base)
+
+if pull_requests.size == 1
+  exit 0 if open_link(pull_requests.first.html_url)
+elsif pull_requests.size > 1
+  url = select_pull_request(pull_requests)
+
+  exit 0 if open_link(url)
+else
+  binding.pry
+
+  result = GitScripts::GitHub.new
+    .create_pull_request(remote, base, head, title, message)
+end
 
 exit 1

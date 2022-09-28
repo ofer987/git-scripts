@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'pry-byebug'
+
 module GitScripts
   class GitHub
     REGEX = %r{github\.com[/:](.*)\.git\b}
@@ -32,13 +34,13 @@ module GitScripts
       end
     end
 
-    def pull_requests(branch_name)
+    def pull_requests(head_name, base_name: develop)
       results = GitHub.github_repos.flat_map do |item|
         @client.pull_requests(item, state: 'open')
       end
 
-      results
-        .select { |item| item.head.ref == branch_name }
+      Array(results)
+        .select { |item| item.head.ref == head_name && item.base.ref == base_name }
         .sort_by(&:updated_at)
         .reverse
     end
