@@ -11,7 +11,7 @@ module GitScripts
     end
 
     def self.branch
-      ARGV[0] || Git.branch_name
+      ARGV[1] || Git.branch_name
     end
 
     def self.open_pull_requests
