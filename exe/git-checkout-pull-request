@@ -96,7 +96,7 @@ def existing_pull_requests(branch_name, base_branch)
 end
 
 begin
-  base = ARGV[1] || 'develop'
+  base = ARGV[0] || 'develop'
   head = GitScripts::Git.branch_name
 
   pull_requests = existing_pull_requests(head, base)
