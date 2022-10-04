@@ -1,24 +1,127 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'pry-byebug'
+
 require_relative '../lib/git_scripts'
 
-def open(url)
+JIRA_REGEX = /^([a-z]+)[-_](\d+)/i
+
+def open_link(url)
   return false if url.blank?
 
   if /darwin/.match? RUBY_PLATFORM
     `open #{url}`
-  else 
+  else
     puts url
   end
 
   true
 end
 
-url = GitScripts::OpenPullRequest.new.execute
-exit 0 if open url
+def jira_key(head)
+  results = JIRA_REGEX.match(head)
+  throw "The branch name #{head} does not contain a Jira Key as #{JIRA_REGEX}" unless results.size >= 3
 
-url = GitScripts::CreatePullRequest.new.execute
-exit 0 if open url
+  "#{results[1]}-#{results[2]}"
+end
+
+def title(jira_key)
+  "[#{jira_key.upcase}]"
+end
+
+def body(jira_key)
+  <<~BODY
+    [#{jira_key.upcase}](https://jira.thomsonreuters.com/browse/#{jira_key})
+
+    # Description
+
+    Please include a summary of the change and/or which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
+
+    ## Type of change
+
+    Please delete options that are not relevant,
+
+    - [ ] Is encapsulated by a Feature [Insert Feature Name]
+    - [ ] Bug fix (non-breaking change which fixes an issue)
+    - [ ] New feature (non-breaking change which adds functionality)
+    - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+    - [ ] This change requires a documentation update
+
+    ## Feature
+
+    Indicate the name of the Feature / Explain why the new code is _not_ encapsulated by a Feature
+
+    # Testing
+
+    # Checklist:
+
+    - [ ] My code follows the style guidelines of this project
+    - [ ] I have performed a self-review of my own code
+    - [ ] I have commented my code, particularly in hard-to-understand areas
+    - [ ] I have made corresponding changes to the documentation
+    - [ ] My changes generate no new warnings
+    - [ ] I have added tests that prove my fix is effective or that my feature works
+    - [ ] New and existing unit tests pass locally with my changes
+    - [ ] Any dependent changes have been merged and published in downstream modules
+
+    # Reviewers
+
+    - [ ] @
+    - [ ] @
+  BODY
+end
+
+def select_pull_request(pull_requests)
+  puts 'Select Pull Request:'
+
+  pull_requests.size.times.each do |i|
+    puts "\t#{i + 1}. #{pull_requests[i].title}"
+  end
+
+  puts 'Enter your choice:'
+  while true
+    index = gets.chomp.to_i
+    break if index >= 1 && index <= pull_requests.size
+
+    puts "Choose between 1 and #{pull_requests.size}"
+  end
+
+  pull_requests[index - 1].html_url
+end
+
+def existing_pull_requests(branch_name, base_branch)
+  GitScripts::GitHub.new
+    .open_pull_requests(branch_name, base_branch)
+end
+
+begin
+  base = ARGV[1] || 'develop'
+  head = GitScripts::Git.branch_name
+
+  pull_requests = existing_pull_requests(head, base)
+
+  if pull_requests.size == 1
+    exit 0 if open_link(pull_requests.first.html_url)
+  elsif pull_requests.size > 1
+    url = select_pull_request(pull_requests)
+
+    exit 0 if open_link(url)
+  else
+    remote = 'tr/digital_emcm-web'
+    key = jira_key(head)
+
+    pr_title = title(key)
+    pr_message = body(key)
+    result = GitScripts::GitHub.new
+      .create_pull_request(remote, base, head, pr_title, pr_message)
+
+    throw "Failed to create Pull Request for branch #{head} against #{base}" if result.blank?
+    open_link(result.html_url)
+  end
+rescue StandardError => e
+  puts e.backtrace
+  puts e.message
+end
 
 exit 1

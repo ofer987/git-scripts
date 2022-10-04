@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'pry-byebug'
+
 module GitScripts
   class GitHub
     REGEX = %r{github\.com[/:](.*)\.git\b}
@@ -32,13 +34,20 @@ module GitScripts
       end
     end
 
-    def pull_requests(branch_name)
-      results = GitHub.github_repos.flat_map do |item|
-        @client.pull_requests(item, state: 'open')
+    def open_pull_requests(head_name, base = develop, options = {})
+      results = []
+      max_pages = options[max_pages] || 2
+      max_page_count = options[max_page_count] || 100
+
+      GitHub.github_repos.flat_map do |item|
+        max_pages.times.each do |page|
+          @client.pull_requests(item, state: 'open', page:, per_page: max_page_count)
+            .each { |pr| results << pr if pr.base.ref == base && pr.head.ref == head_name }
+        end
       end
 
       results
-        .select { |item| item.head.ref == branch_name }
+        .uniq(&:url)
         .sort_by(&:updated_at)
         .reverse
     end
@@ -51,17 +60,22 @@ module GitScripts
       GitHub.github_repos.flat_map do |item|
         max_pages.times.each do |page|
           @client.pull_requests(item, state: 'closed', page:, per_page: max_page_count)
-            .each do |pull_request|
-              if pull_request.base.ref == 'develop' &&
-                 pull_request.title.match?(/#{jira_key}/i) &&
-                 @client.pull_request_merged?(item, pull_request.number)
-                results << pull_request
+            .each do |pr|
+              # rubocop:disable Style/Next
+              if pr.base.ref == 'develop' &&
+                 pr.title.match?(/#{jira_key}/i) &&
+                 @client.pull_request_merged?(item, pr.number)
+                results << pr
               end
+              # rubocop:enable Style/Next
             end
         end
       end
 
       results
+        .uniq(&:url)
+        .sort_by(&:updated_at)
+        .reverse
     end
 
     def jira_keys
