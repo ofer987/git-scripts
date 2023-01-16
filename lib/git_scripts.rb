@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'active_support'
+require 'active_support/core_ext/string/inflections'
 require 'octokit'
 require 'rake'
 require 'rest-client'
@@ -15,6 +16,7 @@ module GitScripts
   require_relative 'git_scripts/pull_request'
   require_relative 'git_scripts/open_pull_request'
   require_relative 'git_scripts/create_pull_request'
+  require_relative 'git_scripts/work_item'
 
   require_relative 'git_scripts/models/jira'
 

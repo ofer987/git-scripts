@@ -5,7 +5,7 @@ require 'pry-byebug'
 
 require_relative '../lib/git_scripts'
 
-JIRA_REGEX = /^([a-z]+)[-_](\d+)/i
+JIRA_REGEX = /^\[?([A-Za-z]*)[-\s]?(\d+)\]?\s*[-:]?\s*(.*)$/
 
 def open_link(url)
   return false if url.blank?
@@ -19,20 +19,13 @@ def open_link(url)
   true
 end
 
-def jira_key(head)
-  results = JIRA_REGEX.match(head)
-  throw "The branch name #{head} does not contain a Jira Key as #{JIRA_REGEX}" unless results.size >= 3
-
-  "#{results[1]}-#{results[2]}"
+def title(work_item)
+  "[#{work_item.key}] #{work_item.title}"
 end
 
-def title(jira_key)
-  "[#{jira_key.upcase}]"
-end
-
-def body(jira_key)
+def body(work_item)
   <<~BODY
-    [#{jira_key.upcase}](https://jira.thomsonreuters.com/browse/#{jira_key})
+    [#{work_item.key}](#{work_item.url})
 
     # Description
 
@@ -109,10 +102,14 @@ begin
     exit 0 if open_link(url)
   else
     remote = 'tr/digital_emcm-web'
-    key = jira_key(head)
+    work_item = WorkItem.new(head)
 
-    pr_title = title(key)
-    pr_message = body(key)
+    pr_title = title(work_item)
+    pr_message = body(work_item)
+
+    require 'pry-byebug'
+    binding.pry
+
     result = GitScripts::GitHub.new
       .create_pull_request(remote, base, head, pr_title, pr_message)
 

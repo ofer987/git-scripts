@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry-byebug'
-
 module GitScripts
   class GitHub
     REGEX = %r{github\.com[/:](.*)\.git\b}
