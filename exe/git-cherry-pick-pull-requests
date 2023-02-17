@@ -30,7 +30,7 @@ def cherry_pick_pull_requests(jira_key)
   add_empty_commit
 
   prs = GitScripts::GitHub.new(access_token: PAT)
-    .merged_pull_requests(REMOTE, jira_key)
+    .merged_pull_requests(jira_key)
     .sort_by(&:merged_at)
 
   Logger.puts "### Cherry-picking the following PRs (in ascending order of merge date):\n"

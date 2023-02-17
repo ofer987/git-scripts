@@ -50,7 +50,7 @@ module GitScripts
         .reverse
     end
 
-    def merged_pull_requests(remote, jira_key, options = {})
+    def merged_pull_requests(jira_key, options = {})
       results = []
       max_pages = options[max_pages] || 2
       max_page_count = options[max_page_count] || 100

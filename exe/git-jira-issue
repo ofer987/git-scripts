@@ -10,15 +10,13 @@ class Issue
   end
 
   def <=>(other)
-    if self.project == other.project
-      return self.id <=> other.id
-    end
+    return id <=> other.id if project == other.project
 
-    self.project <=> other.project
+    project <=> other.project
   end
 
   def to_s
-    "#{self.project}-#{self.id}"
+    "#{project}-#{id}"
   end
 
   private
@@ -36,12 +34,12 @@ branch_name = `git rev-parse --abbrev-ref HEAD`
 
 jira_issue_matches = Array(branch_name.match(JIRA_ISSUE_REGEX))
 if jira_issue_matches.empty? || jira_issue_matches.size != 3
-  puts BASE_URL 
+  puts BASE_URL
 
   return
 end
 
-issue = Issue.new(jira_issue_matches[1], jira_issue_matches[2]) 
+issue = Issue.new(jira_issue_matches[1], jira_issue_matches[2])
 uri = URI("#{BASE_URL}/#{issue}")
 
 puts uri

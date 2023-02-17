@@ -10,15 +10,13 @@ class Issue
   end
 
   def <=>(other)
-    if self.project == other.project
-      return self.id <=> other.id
-    end
+    return id <=> other.id if project == other.project
 
-    self.project <=> other.project
+    project <=> other.project
   end
 
   def to_s
-    "#{self.project}-#{self.id}"
+    "#{project}-#{id}"
   end
 
   private
@@ -33,7 +31,7 @@ issues = lines.split("\n")
   .select { |items| items.size == 3 }
   .map { |items| items[1..2] }
   .map { |items| Issue.new(items[0], items[1]) }
-  .uniq { |issue| issue.to_s }
+  .uniq(&:to_s)
   .sort
 
 puts issues.map(&:to_s)
