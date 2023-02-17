@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'pry-byebug'
-
 require_relative '../lib/git_scripts'
 
 JIRA_REGEX = /^\[?([A-Za-z]*)[-\s]?(\d+)\]?\s*[-:]?\s*(.*)$/
@@ -106,9 +104,6 @@ begin
 
     pr_title = title(work_item)
     pr_message = body(work_item)
-
-    require 'pry-byebug'
-    binding.pry
 
     result = GitScripts::GitHub.new
       .create_pull_request(remote, base, head, pr_title, pr_message)
