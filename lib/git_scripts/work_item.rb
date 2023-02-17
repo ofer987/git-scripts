@@ -44,7 +44,15 @@ class WorkItem
   end
 
   def key
-    @key ||= "#{project}-#{number}"
+    return @key if defined? @key
+
+    if jira?
+      return @key ||= "#{project}-#{number}"
+    elsif ado?
+      return @key ||= "AB##{number}"
+    end
+
+    throw 'It is neither Jira nor Azure DevOps!'
   end
 
   def <=>(other)
