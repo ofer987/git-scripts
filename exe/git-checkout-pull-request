@@ -3,8 +3,6 @@
 
 require_relative '../lib/git_scripts'
 
-JIRA_REGEX = /^\[?([A-Za-z]*)[-\s]?(\d+)\]?\s*[-:]?\s*(.*)$/
-
 def open_link(url)
   return false if url.blank?
 
@@ -18,7 +16,7 @@ def open_link(url)
 end
 
 def title(work_item)
-  "[#{work_item.key}] #{work_item.title}"
+  work_item.to_s
 end
 
 def body(work_item)
@@ -41,7 +39,7 @@ def body(work_item)
 
     ## Feature
 
-    Indicate the name of the Feature / Explain why the new code is _not_ encapsulated by a Feature
+    Not applicable
 
     # Testing
 
@@ -58,6 +56,7 @@ def body(work_item)
 
     # Reviewers
 
+    - [ ] @
     - [ ] @
     - [ ] @
   BODY
@@ -86,9 +85,14 @@ def existing_pull_requests(branch_name, base_branch)
     .open_pull_requests(branch_name, base_branch)
 end
 
+def remote
+  GitScripts::Git.repo_url
+end
+
 begin
   base = ARGV[0] || 'develop'
   head = GitScripts::Git.branch_name
+  remote = GitScripts::Git.repo_id
 
   pull_requests = existing_pull_requests(head, base)
 
@@ -99,8 +103,9 @@ begin
 
     exit 0 if open_link(url)
   else
-    remote = 'tr/digital_emcm-web'
-    work_item = WorkItem.new(head)
+    work_item = WorkItem.create(head)
+
+    raise WorkItem::INVALID if work_item.nil?
 
     pr_title = title(work_item)
     pr_message = body(work_item)

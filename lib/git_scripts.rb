@@ -20,9 +20,6 @@ module GitScripts
 
   require_relative 'git_scripts/models/jira'
 
-  class Error < StandardError; end
-  # Your code goes here...
-
   class PullRequest
     def branch
       return @branch if defined? @branch
@@ -38,7 +35,7 @@ module GitScripts
     end
 
     def execute
-      throw NotImplementedError
+      raise NotImplementedError
     end
 
     protected

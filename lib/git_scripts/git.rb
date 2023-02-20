@@ -22,7 +22,17 @@ module GitScripts
     end
 
     def self.origin_url
-      `git config remote.origin.url`.strip
+      @origin_url ||= `git config remote.#{default_remote}.url`.chomp
+    end
+
+    def self.default_remote
+      @default_remote ||= `git config --get checkout.defaultremote`.chomp || 'origin'
+    end
+
+    def self.repo_id
+      @repo_id ||= `git config remote.#{default_remote}.url`.chomp
+        .gsub('https://github.com/', '')
+        .gsub('.git', '')
     end
 
     def self.repo_url
