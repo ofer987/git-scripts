@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+puts GitScripts::GitHub.new.pull_requests.map(&:to_s).join("\n")

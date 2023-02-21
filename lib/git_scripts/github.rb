@@ -4,6 +4,10 @@ module GitScripts
   class GitHub
     REGEX = %r{github\.com[/:](.*)\.git\b}
 
+    def self.default_repo
+      (Array(github_repos) ['origin'])[0]
+    end
+
     def self.github_repos
       repos = `git remote -v`.chomp.split("\n")
 
@@ -70,6 +74,41 @@ module GitScripts
         end
       end
 
+      results
+        .uniq(&:url)
+        .sort_by(&:updated_at)
+        .reverse
+    end
+
+    def pull_requests(options = {})
+      require 'pry-byebug'
+      results = []
+      max_pages = options[max_pages] || 4
+      max_page_count = options[max_page_count] || 100
+      last_month = Time.now - 1.months
+
+      GitHub.github_repos.flat_map do |item|
+        max_pages.times.each do |page|
+          @client.pull_requests(item, state: 'open', sort: 'created', page: page + 1, per_page: max_page_count)
+            .filter { |pr| pr.created_at >= last_month }
+            .each do |pr|
+              results << pr
+            end
+        end
+
+        max_pages.times.each do |page|
+          @client.pull_requests(item, state: 'closed', page:, per_page: max_page_count)
+            .filter { |pr| pr.created_at >= last_month }
+            .each do |pr|
+              if pr.base.ref == 'develop' &&
+                 @client.pull_request_merged?(item, pr.number)
+                results << pr
+              end
+            end
+        end
+      end
+
+      binding.pry
       results
         .uniq(&:url)
         .sort_by(&:updated_at)

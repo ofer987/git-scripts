@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'active_support'
+require 'active_support/duration'
+require 'active_support/core_ext'
 require 'active_support/core_ext/string/inflections'
 require 'octokit'
 require 'rake'
