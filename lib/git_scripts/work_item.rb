@@ -12,6 +12,13 @@ module WorkItem
 
   class << self
     def create(value)
+      regex = /^(?:ado-)?(\d+)(?:-(.*))?$/i
+      if value.match? regex
+        key, title = value.match(regex)[1..2]
+
+        return ADO.new(key, title)
+      end
+
       regex = /^(?:ab-)?(\d+)(?:-(.*))?$/i
       if value.match? regex
         key, title = value.match(regex)[1..2]
