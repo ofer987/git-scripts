@@ -49,6 +49,16 @@ module GitScripts
         .gsub(%r{(https://.*):(.*)/(.*)}, '\\1/\\2/\\3')
     end
 
+    def self.actions_url
+      url = "#{origin_url}/actions"
+
+      url = url.gsub(/\.git/, '') if /\.git/.match? url
+
+      url
+        .gsub(/^git@/, 'https://')
+        .gsub(%r{(https://.*):(.*)/(.*)}, '\\1/\\2/\\3')
+    end
+
     def self.github_repo
       repo_url.gsub('https://github.com/', '')
     end
