@@ -29,6 +29,10 @@ module GitScripts
       @default_remote ||= `git config --get checkout.defaultremote`.chomp || 'origin'
     end
 
+    def self.default_base_branch
+      @default_base_branch ||= `git config --get init.defaultBranch`.chomp || 'master'
+    end
+
     def self.repo_id
       @repo_id ||= `git config remote.#{default_remote}.url`.chomp
         .gsub('https://github.com/', '')
