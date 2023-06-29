@@ -4,6 +4,8 @@ module GitScripts
   class GitHub
     REGEX = %r{github\.com[/:](.*)\.git\b}
 
+    attr_reader :client
+
     def self.github_repos
       repos = `git remote -v`.chomp.split("\n")
 
@@ -20,12 +22,12 @@ module GitScripts
 
     def initialize(options = {})
       if !options.blank?
-        @client = Octokit::Client.new(options)
+        self.client = Octokit::Client.new(options)
       else
         @username = Git.username
         @password = Git.password
 
-        @client = Octokit::Client.new(
+        self.client = Octokit::Client.new(
           login: @username,
           password: @password
         )
@@ -39,7 +41,7 @@ module GitScripts
 
       GitHub.github_repos.flat_map do |item|
         max_pages.times.each do |page|
-          @client.pull_requests(item, state: 'open', page:, per_page: max_page_count)
+          client.pull_requests(item, state: 'open', page:, per_page: max_page_count)
             .each { |pr| results << pr if pr.base.ref == base && pr.head.ref == head_name }
         end
       end
@@ -57,12 +59,12 @@ module GitScripts
 
       GitHub.github_repos.flat_map do |item|
         max_pages.times.each do |page|
-          @client.pull_requests(item, state: 'closed', page:, per_page: max_page_count)
+          client.pull_requests(item, state: 'closed', page:, per_page: max_page_count)
             .each do |pr|
               # rubocop:disable Style/Next
               if pr.base.ref == 'develop' &&
                  pr.title.match?(/#{jira_key}/i) &&
-                 @client.pull_request_merged?(item, pr.number)
+                 client.pull_request_merged?(item, pr.number)
                 results << pr
               end
               # rubocop:enable Style/Next
@@ -87,7 +89,9 @@ module GitScripts
     end
 
     def create_pull_request(repo, base, head, key, body)
-      @client.create_pull_request(repo, base, head, key, body)
+      client.create_pull_request(repo, base, head, key, body)
     end
+
+    attr_writer :client
   end
 end
