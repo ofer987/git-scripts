@@ -2,6 +2,7 @@
 
 require 'active_support'
 require 'active_support/core_ext/string/inflections'
+require 'active_support/core_ext/object/blank'
 require 'octokit'
 require 'rake'
 require 'rest-client'

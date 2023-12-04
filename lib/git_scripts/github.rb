@@ -22,12 +22,12 @@ module GitScripts
 
     def initialize(options = {})
       if !options.blank?
-        self.client = Octokit::Client.new(options)
+        @client = Octokit::Client.new(options)
       else
         @username = Git.username
         @password = Git.password
 
-        self.client = Octokit::Client.new(
+        @client = Octokit::Client.new(
           login: @username,
           password: @password
         )
