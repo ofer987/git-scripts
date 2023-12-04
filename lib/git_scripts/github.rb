@@ -89,7 +89,7 @@ module GitScripts
     end
 
     def create_pull_request(repo, base, head, key, body)
-      client.create_pull_request(repo, base, head, key, body)
+      client.create_pull_request(repo, base, head, key, body, { auto_merge: true })
     end
   end
 end
