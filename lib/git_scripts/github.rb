@@ -91,7 +91,5 @@ module GitScripts
     def create_pull_request(repo, base, head, key, body)
       client.create_pull_request(repo, base, head, key, body)
     end
-
-    attr_writer :client
   end
 end
