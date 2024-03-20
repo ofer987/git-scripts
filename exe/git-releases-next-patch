@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+RELEASES_REGEX = %r{^releases/(\d+)\.(\d+)\.(\d+)$}
+
+branch_name = GitScripts::Git.branch_name
+
+exit 1 unless RELEASES_REGEX.match? branch_name
+
+matches = RELEASES_REGEX.match(branch_name)
+puts "releases/#{matches[1]}.#{matches[2]}\.#{matches[3].to_i + 1}"
