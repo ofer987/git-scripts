@@ -12,8 +12,17 @@ require 'yaml'
 
 require_relative 'git_scripts/version'
 
+def environment_variable(name)
+  result = ENV[name].to_s.strip
+
+  return result unless result.blank?
+
+  puts "The #{name} environment variable is missing"
+  exit 1
+end
+
 module GitScripts
-  require_relative './git_scripts/git'
+  require_relative 'git_scripts/git'
   require_relative 'git_scripts/github'
   require_relative 'git_scripts/pull_request'
   require_relative 'git_scripts/open_pull_request'
