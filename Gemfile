@@ -6,6 +6,7 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'activesupport', '~> 7.0'
+gem 'json', '~> 2.7.2'
 gem 'octokit', '~> 4.22'
 gem 'rake', '~> 13.0'
 gem 'rest-client', '~> 2.1'

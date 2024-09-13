@@ -46,6 +46,7 @@ GEM
       domain_name (~> 0.5)
     i18n (1.10.0)
       concurrent-ruby (~> 1.0)
+    json (2.7.2)
     method_source (1.0.0)
     mime-types (3.4.1)
       mime-types-data (~> 3.2015)
@@ -89,6 +90,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport (~> 7.0)
   git-scripts!
+  json (~> 2.7.2)
   octokit (~> 4.22)
   pry-byebug (~> 3.9)
   rake (~> 13.0)
