@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+REPO = ARGV[0].to_s
+
+repo_info = REPO.split('/')
+repo = GitScripts::Repo.new(*repo_info)
+
+unless repo.archived? || repo.no_code_scanning?
+  puts "#{repo} is neither archived nor is tagged with #{GitScripts::Repo::NO_CODE_SCANNING}"
+
+  exit 1
+end

@@ -28,6 +28,7 @@ module GitScripts
   require_relative 'git_scripts/open_pull_request'
   require_relative 'git_scripts/create_pull_request'
   require_relative 'git_scripts/work_item'
+  require_relative 'git_scripts/repo'
 
   require_relative 'git_scripts/models/jira'
 
