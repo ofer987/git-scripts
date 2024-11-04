@@ -32,6 +32,13 @@ module GitScripts
           password: @password
         )
       end
+
+    def delete_secret(remote, name)
+      client.delete_secret(remote, name)
+    end
+
+    def list_secrets(remote)
+      client.list_secrets(remote, per_page: 100)
     end
 
     def open_pull_requests(head_name, base = develop, options = {})
