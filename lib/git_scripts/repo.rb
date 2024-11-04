@@ -3,6 +3,7 @@
 module GitScripts
   class Repo
     NO_CODE_SCANNING = 'no-code-scanning'
+    SNYK_AND_CICD_SCANNING = 'ddci-tr-digital-preprod'
     ARCHIVED = 'archived'
 
     attr_reader :owner, :name
@@ -10,13 +11,28 @@ module GitScripts
     def initialize(owner, name)
       @owner = owner.to_s
       @name = name.to_s
+
+      body
+      @not_found = false
+    rescue RestClient::NotFound
+      @not_found = true
     end
 
     def no_code_scanning?
       topic? NO_CODE_SCANNING
     end
 
+    def not_found?
+      @not_found
+    end
+
+    def snyk_and_cicd_enabled?
+      topic? SNYK_AND_CICD_SCANNING
+    end
+
     def archived?
+      return false if @not_found
+
       body[ARCHIVED]
     rescue RestClient::Exception
       puts "Failed to determine whether '#{self}' is archived"
@@ -25,6 +41,8 @@ module GitScripts
     end
 
     def topic?(value)
+      return false if @not_found
+
       topics = Array(body['topics'])
       topics.any? value
     rescue RestClient::Exception
