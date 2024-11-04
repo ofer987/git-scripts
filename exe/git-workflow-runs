@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+csv_path = ARGV[0].to_s
+runs = File.readlines(csv_path)[1..]
+
+workflows = runs.map do |workflow|
+  item = workflow
+    .split(',')
+    .map(&:strip)
+
+  branch = item[3..].to_s
+
+  GitScripts::Workflow.new(item[0], item[1], item[2], branch)
+end
+
+exit_status = 0
+workflows.each do |item|
+  puts item
+  failures = item.recent_runs
+
+  next unless failures.size.positive?
+
+  puts 'Several workflows failed:'
+  puts failures.join("\n")
+
+  exit_status = 1
+end
+
+exit exit_status
