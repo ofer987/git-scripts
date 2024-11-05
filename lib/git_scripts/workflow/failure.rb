@@ -14,8 +14,13 @@ module GitScripts
       end
 
       def to_s
-        @to_s ||=
-          "#{workflow} has failed in #{branch} with status #{status} (#{conclusion}) at #{started_at_in_utc} in UTC"
+        return @to_s if defined? @to_s
+
+        value = <<~HEREDOC
+          #{workflow} (started at #{started_at_in_utc} in UTC) has failed in the #{branch} branch with status #{status} (#{conclusion})
+        HEREDOC
+
+        @to_s = value.chomp
       end
     end
   end
