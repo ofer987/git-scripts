@@ -10,3 +10,5 @@ tr, digital_dcl-ui, releases-ci.yml
 tr, digital_dcl-ui, 9.0.0-dcl-publish.yml, 9.0.0
 tr, digital_dcl-ui, 9.0.0-develop-deploy.yml, develop
 tr, digital_dxp-sre-tools, adobe_pipeline_notification.yaml, master
+tr, digital_dxp-sre-tools, retrieve_dispatcher_logs.yaml
+tr, digital_dxp-sre-tools, datadog_forwarder.yaml
