@@ -1,0 +1,12 @@
+owner, repository, workflow_id, branch (optional)
+tr, digital_emcm-web, ci.yml, develop
+tr, digital_emcm-web, ci-release.yml, release
+tr, digital_emcm-web, new-release-tag.yml, release
+tr, digital_emcm-web, sonarqube-develop-scan.yml, develop
+tr, digital_emcm-web, sonarqube-pr-scan.yml
+tr, digital_emcm-web, sonarqube-releases-master-scan.yml
+tr, digital_dcl-ui, 9.0.0-ci.yml, 9.0.0
+tr, digital_dcl-ui, releases-ci.yml
+tr, digital_dcl-ui, 9.0.0-dcl-publish.yml, 9.0.0
+tr, digital_dcl-ui, 9.0.0-develop-deploy.yml, develop
+tr, digital_dxp-sre-tools, adobe_pipeline_notification.yaml, master

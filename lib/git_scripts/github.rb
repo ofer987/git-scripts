@@ -21,17 +21,20 @@ module GitScripts
     end
 
     def initialize(options = {})
-      if !options.blank?
+      unless options.blank?
         @client = Octokit::Client.new(options)
-      else
-        @username = Git.username
-        @password = Git.password
 
-        @client = Octokit::Client.new(
-          login: @username,
-          password: @password
-        )
+        return
       end
+
+      @username = Git.username
+      @password = Git.password
+
+      @client = Octokit::Client.new(
+        login: @username,
+        password: @password
+      )
+    end
 
     def delete_secret(remote, name)
       client.delete_secret(remote, name)
