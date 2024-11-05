@@ -47,7 +47,9 @@ module GitScripts
           item['status'] == 'completed' && (item['conclusion'] == 'success' || item['conclusion'] == 'cancelled')
         end
 
-      failures.map { |item| Failure.new(self, item['head_branch'], item['status'], item['conclusion']) }
+      failures.map do |item|
+        Failure.new(self, item['head_branch'], item['status'], item['conclusion'], item['run_started_at'])
+      end
     end
   end
 end
