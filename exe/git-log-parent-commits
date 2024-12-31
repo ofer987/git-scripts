@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+COMMIT = ARGV[0].to_s
+BRANCH = ARGV[1] || GitScripts::Git.default_base_branch
+
+system("git log --reverse --ancestry-path #{COMMIT}..#{BRANCH}")
