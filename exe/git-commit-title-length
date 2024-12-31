@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+title = `git show --format="%b"`
+  .to_s
+  .match(/(\w.+)/)[1]
+
+puts title.size
