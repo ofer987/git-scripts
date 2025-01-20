@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+COMMIT_SHA = ARGV[0].to_s || 'HEAD'
+message = `git log #{COMMIT_SHA}~1..#{COMMIT_SHA} --pretty=full`
+
+# Wrap in an Array in case the message does _not_ have a body!
+body = Array(message.split("\n")[6..])
+  .map(&:strip)
+  .join("\n")
+
+puts body
