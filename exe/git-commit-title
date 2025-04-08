@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+commit = ARGV[0]
+
+puts `git log #{commit}~1..#{commit} --format="%H%n%ae%n%n%B"`
