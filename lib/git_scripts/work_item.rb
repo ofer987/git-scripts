@@ -40,7 +40,7 @@ module WorkItem
         return Jira.new(project, key, title)
       end
 
-      Nil.new
+      Nil.new(value)
     end
   end
 end

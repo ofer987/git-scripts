@@ -2,20 +2,30 @@
 
 module WorkItem
   class Nil < Base
+    def initialize(title)
+      super
+
+      @title = title.to_s.strip.titlecase
+    end
+
     def url
       ''
     end
 
     def key
-      ''
+      @key ||= title
     end
 
     def blank?
-      true
+      false
     end
 
     def nil?
-      true
+      false
+    end
+
+    def to_s
+      @title
     end
   end
 end

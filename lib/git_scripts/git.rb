@@ -35,6 +35,7 @@ module GitScripts
 
     def self.repo_id
       @repo_id ||= `git config remote.#{default_remote}.url`.chomp
+        .gsub('git@github.com:', '')
         .gsub('https://github.com/', '')
         .gsub('.git', '')
     end
