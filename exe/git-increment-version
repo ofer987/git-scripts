@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+RELEASE_BRANCH_REGEX = %r{^releases/(\d+)\.(\d+)\.(\d+)$}
+
+branch_name = GitScripts::Git.branch_name
+
+exit 1 unless branch_name.match? RELEASE_BRANCH_REGEX
+
+version = branch_name.match(RELEASE_BRANCH_REGEX)
+
+major = version[1].to_i
+minor = version[2].to_i
+patch = version[3].to_i
+
+puts "#{major}.#{minor}.#{patch + 1}"
