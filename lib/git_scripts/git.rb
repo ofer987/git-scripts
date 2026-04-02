@@ -21,6 +21,10 @@ module GitScripts
       `git config --get branch.#{branch_name}.remote`.chomp
     end
 
+    def self.fetch_origin
+      `git fetch origin`
+    end
+
     def self.origin_url
       @origin_url ||= `git config remote.#{default_remote}.url`.chomp
     end

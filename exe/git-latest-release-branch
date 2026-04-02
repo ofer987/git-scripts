@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/git_scripts'
+
+SEMVER_REGEX = /(\d+\.\d+\.\d+)$/
+RELEASE_BRANCH_REGEX = /^(\d+)\.(\d+)/
+
+release_branch_string = ARGV[0].to_s.strip
+unless release_branch_string.match? RELEASE_BRANCH_REGEX
+  puts "Provide argument in the form of '<MAJOR>.<MINOR>'"
+
+  exit 1
+end
+
+major, minor = release_branch_string.match(RELEASE_BRANCH_REGEX)[1..2]
+releases_branch = "origin/releases/#{major}.#{minor}"
+
+GitScripts::Git.fetch_origin
+
+result = `git branch --list --remote`
+  .split("\n")
+  .map(&:strip)
+  .select { |item| item.start_with? releases_branch }
+  .sort do |first, other|
+    version_major, version_minor, version_patch = first.match(SEMVER_REGEX)[1]
+      .split('.')
+      .map(&:to_i)
+    other_version_major, other_version_minor, other_version_patch = other.match(SEMVER_REGEX)[1]
+      .split('.')
+      .map(&:to_i)
+
+    version = SemVer.new(version_major, version_minor, version_patch)
+    other_version = SemVer.new(other_version_major, other_version_minor, other_version_patch)
+
+    version <=> other_version
+  end
+
+latest_release_branch = result.last
+  .gsub('origin/', '')
+
+puts latest_release_branch
