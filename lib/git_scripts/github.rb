@@ -44,6 +44,8 @@ module GitScripts
       client.list_secrets(remote, per_page: 100)
     end
 
+    # rubocop:disable Metrics/PerceivedComplexity
+    # rubocop:disable Metrics/CyclomaticComplexity
     def open_pull_requests(head_name, base = develop, options = {})
       results = []
       max_pages = options[max_pages] || 2
@@ -61,7 +63,11 @@ module GitScripts
         .sort_by(&:updated_at)
         .reverse
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/PerceivedComplexity
 
+    # rubocop:disable Metrics/PerceivedComplexity
+    # rubocop:disable Metrics/CyclomaticComplexity
     def merged_pull_requests(jira_key, options = {})
       results = []
       max_pages = options[max_pages] || 2
@@ -87,6 +93,8 @@ module GitScripts
         .sort_by(&:updated_at)
         .reverse
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/PerceivedComplexity
 
     def jira_keys
       merged_pull_requests

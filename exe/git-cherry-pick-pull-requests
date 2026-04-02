@@ -156,10 +156,10 @@ end
 begin
   cherry_pick_pull_requests(JIRA_KEY)
 
-  puts Logger.to_s
+  puts Logger
 rescue StandardError => e
   puts 'Failed to Cherry-pick Pull Requests'
-  puts Logger.to_s
+  puts Logger
 
   puts "Exception:\n#{e}"
 end

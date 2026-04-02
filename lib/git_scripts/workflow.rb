@@ -44,7 +44,7 @@ module GitScripts
         .reject { |item| item['status'] == 'in_progress' }
         .reject { |item| item['status'] == 'queued' }
         .reject do |item|
-          item['status'] == 'completed' && (item['conclusion'] == 'success' || item['conclusion'] == 'cancelled')
+          item['status'] == 'completed' && %w[success cancelled].include?(item['conclusion'])
         end
 
       failures.map do |item|

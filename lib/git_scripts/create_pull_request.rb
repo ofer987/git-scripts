@@ -11,7 +11,7 @@ module GitScripts
     def select_pull_request
       result = gets.to_s.strip
 
-      if result.downcase == 'n' || result.downcase == 'new'
+      if %w[n new].include? result.downcase
         GitHub.create_pull_request_url(branch)
       elsif (index = result.to_i) != 0 && index >= 1 && index <= pull_requests.size
         pull_requests[result.to_i - 1].html_url
