@@ -3,7 +3,7 @@
 
 require_relative '../lib/git_scripts'
 
-RELEASE_BRANCH_REGEX = %r{^releases/(\d+)\.(\d+)\.(\d+)$}
+RELEASE_BRANCH_REGEX = %r{^.+/(\d+)\.(\d+)\.(\d+)$}
 
 branch_name = GitScripts::Git.branch_name
 

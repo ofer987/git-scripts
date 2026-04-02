@@ -10,7 +10,7 @@ bundle install
 
 ## Configuration
 
-1. Create a Personal Authentication Token in GitHub with the `repo` permission. Assign it to the `GITHUB_TOKEN` environment variable. 
+1. Create a Personal Authentication Token in GitHub with the `repo` permission. Assign it to the `GITHUB_TOKEN` environment variable.
 2. (Optional) Set the default branch when **Creating a Pull Request** by setting the `init.defaultBranch` property in **Git Config**, otherwise it will assume `main` or `master` by default. Here is how to set it to `develop`,
 
 ```

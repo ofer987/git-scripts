@@ -63,8 +63,8 @@ end
 
 begin
   base = ARGV[0] || GitScripts::Git.default_base_branch
+  remote = ARGV[1] || GitScripts::Git.repo_id
   head = GitScripts::Git.branch_name
-  remote = GitScripts::Git.repo_id
 
   pull_requests = existing_pull_requests(head, base)
 
