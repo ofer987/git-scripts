@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'active_support'
+require 'active_support/core_ext'
 require 'active_support/core_ext/string/inflections'
 require 'active_support/core_ext/object/blank'
 require 'json'
@@ -8,7 +9,10 @@ require 'octokit'
 require 'rake'
 require 'semver'
 require 'rest-client'
+require 'time'
 require 'yaml'
+require 'nokogiri'
+require 'base64'
 
 require_relative 'git_scripts/version'
 
@@ -24,6 +28,7 @@ end
 module GitScripts
   require_relative 'git_scripts/git'
   require_relative 'git_scripts/github'
+  require_relative 'git_scripts/environment'
   require_relative 'git_scripts/pull_request'
   require_relative 'git_scripts/open_pull_request'
   require_relative 'git_scripts/create_pull_request'

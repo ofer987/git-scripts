@@ -3,8 +3,23 @@
 
 require_relative '../lib/git_scripts'
 
+require 'active_support'
+require 'active_support/core_ext'
+require 'nokogiri'
+require 'rest-client'
+require 'base64'
+
 SEMVER_REGEX = /(\d+\.\d+\.\d+)$/
 RELEASE_BRANCH_REGEX = /^(\d+)\.(\d+)/
+ENVIRONMENT_REGEX = /^dev|qa|uat|ppe|prod$/i
+
+environment_string = ARGV[0].to_s.strip
+if environment_string.match? ENVIRONMENT_REGEX
+  version = GitScripts::Environment.latest_environment_version(environment_string)
+  puts "releases/#{version}"
+
+  exit 0
+end
 
 release_branch_string = ARGV[0].to_s.strip
 unless release_branch_string.match? RELEASE_BRANCH_REGEX
