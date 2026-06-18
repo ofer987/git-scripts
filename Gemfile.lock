@@ -37,6 +37,8 @@ GEM
       logger
     faraday-net_http (3.4.2)
       net-http (~> 0.5)
+    faraday-retry (2.4.0)
+      faraday (~> 2.0)
     http-accept (1.7.0)
     http-cookie (1.1.0)
       domain_name (~> 0.5)
@@ -113,10 +115,12 @@ GEM
 
 PLATFORMS
   arm64-darwin-21
+  arm64-darwin-22
 
 DEPENDENCIES
   activesupport (~> 7.0)
   base64 (~> 0.3.0)
+  faraday-retry (~> 2.4.0)
   git-scripts!
   json (~> 2.7.2)
   nokogiri (~> 1.18.10)

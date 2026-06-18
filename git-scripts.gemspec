@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = 'Various helper git scripts'
   spec.description = 'Various helper git scripts'
   spec.homepage = 'https://github.com/ofer987/dotfiles'
-  spec.required_ruby_version = '~> 3.1'
+  spec.required_ruby_version = '~> 3.3.6'
 
   spec.metadata['allowed_push_host'] = 'https://github.com/ofer987/dotfiles'
 
