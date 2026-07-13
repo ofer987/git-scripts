@@ -7,6 +7,7 @@ gemspec
 
 gem 'activesupport', '~> 7.0'
 gem 'base64', '~> 0.3.0'
+gem 'faraday', '~> 2.14.3'
 gem 'faraday-retry', '~> 2.4.0'
 gem 'json', '~> 2.7.2'
 gem 'nokogiri', '~> 1.18.10'
