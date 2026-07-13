@@ -5,10 +5,7 @@ module WorkItem
     attr_reader :number, :title
 
     def initialize(number, title)
-      super
-
-      @number = number.to_i
-      @title = title.to_s.strip.titlecase
+      super(number.to_i, title)
     end
 
     def to_s

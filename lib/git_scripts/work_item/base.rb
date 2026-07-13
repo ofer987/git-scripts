@@ -4,7 +4,10 @@ module WorkItem
   class Base
     attr_reader :number, :title
 
-    def initialize(*args); end
+    def initialize(number, title)
+      @number = number
+      @title = WorkItem.to_titlecase(title)
+    end
 
     def to_h
       {

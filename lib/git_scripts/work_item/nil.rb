@@ -3,9 +3,7 @@
 module WorkItem
   class Nil < Base
     def initialize(title)
-      super
-
-      @title = title.to_s.strip.titlecase
+      super(0, title)
     end
 
     def url

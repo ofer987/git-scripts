@@ -5,11 +5,9 @@ module WorkItem
     attr_reader :project, :number, :title
 
     def initialize(project, number, title)
-      super
+      super(number.to_i, title)
 
       @project = project.to_s.strip.upcase
-      @number = number.to_i
-      @title = title.to_s.strip.titlecase
     end
 
     def to_s

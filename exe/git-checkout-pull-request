@@ -25,13 +25,28 @@ def body(work_item)
 
     ## Description
 
-    Please include a summary of the change and/or which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
+    #{description}
 
     ## Reviewers
 
     - [ ] @
     - [ ] @
   BODY
+end
+
+def description
+  github_body = github_commit_bodies.join("\n")
+
+  return github_body unless github_body.blank?
+
+  "Please include a summary of the change and/or which issue is fixed. Please also include relevant motivation \
+  and context. List any dependencies that are required for this change."
+end
+
+def github_commit_bodies
+  `git log origin/master..HEAD --format="%B"`.split("\n")
+    .reject(&:blank?)
+    .map { |sentence| WorkItem.to_sentencecase(sentence) }
 end
 
 def select_pull_request(pull_requests)

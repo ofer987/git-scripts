@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 module WorkItem
-  class ADO
+  class ADO < Base
     attr_reader :project, :number, :title
 
     def initialize(number, title)
-      @number = number.to_i
-      @title = title.to_s.strip.titlecase
+      super(number.to_i, title)
     end
 
     def to_s
