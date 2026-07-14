@@ -35,6 +35,7 @@ module GitScripts
   require_relative 'git_scripts/work_item'
   require_relative 'git_scripts/repo'
   require_relative 'git_scripts/workflow'
+  require_relative 'git_scripts/string'
 
   require_relative 'git_scripts/models/jira'
 

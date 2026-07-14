@@ -6,7 +6,7 @@ module WorkItem
 
     def initialize(number, title)
       @number = number
-      @title = WorkItem.to_titlecase(title)
+      @title = title.to_titlecase
     end
 
     def to_h

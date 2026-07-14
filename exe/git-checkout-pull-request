@@ -46,7 +46,7 @@ end
 def github_commit_bodies
   `git log origin/master..HEAD --format="%B"`.split("\n")
     .reject(&:blank?)
-    .map { |sentence| WorkItem.to_sentencecase(sentence) }
+    .map(&:to_sentencecase)
 end
 
 def select_pull_request(pull_requests)
