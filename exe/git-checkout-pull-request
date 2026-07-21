@@ -19,13 +19,13 @@ def title(work_item)
   work_item.to_s
 end
 
-def body(work_item)
+def body(work_item, base_branch)
   <<~BODY
     [#{work_item.key}](#{work_item.url})
 
     ## Description
 
-    #{description}
+    #{description(base_branch)}
 
     ## Reviewers
 
@@ -34,8 +34,8 @@ def body(work_item)
   BODY
 end
 
-def description
-  github_body = github_commit_bodies.join("\n")
+def description(base_branch)
+  github_body = github_commit_bodies(base_branch).join("\n")
 
   return github_body unless github_body.blank?
 
@@ -43,8 +43,8 @@ def description
   and context. List any dependencies that are required for this change."
 end
 
-def github_commit_bodies
-  `git log origin/master..HEAD --format="%B"`.split("\n")
+def github_commit_bodies(base_branch)
+  `git log #{base_branch}..HEAD --format="%B"`.split("\n")
     .reject(&:blank?)
     .map(&:to_sentencecase)
 end
@@ -80,6 +80,7 @@ begin
   base = ARGV[0] || GitScripts::Git.default_base_branch
   remote = ARGV[1] || GitScripts::Git.repo_id
   head = GitScripts::Git.branch_name
+  base_branch = "#{GitScripts::Git.default_remote}/#{base}"
 
   pull_requests = existing_pull_requests(head, base)
 
@@ -95,7 +96,7 @@ begin
     raise WorkItem::INVALID if work_item.nil?
 
     pr_title = title(work_item)
-    pr_message = body(work_item)
+    pr_message = body(work_item, base_branch)
 
     result = GitScripts::GitHub.new
       .create_pull_request(remote, base, head, pr_title, pr_message)
