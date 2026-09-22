@@ -9,7 +9,7 @@ require 'nokogiri'
 require 'rest-client'
 require 'base64'
 
-SEMVER_REGEX = /(\d+\.\d+\.\d+)$/
+SEMVER_REGEX = /\d+\.\d+\.(\d+)$/
 RELEASE_BRANCH_REGEX = /^(\d+)\.(\d+)/
 ENVIRONMENT_REGEX = /^dev|qa|uat|ppe|prod$/i
 
@@ -29,29 +29,20 @@ unless release_branch_string.match? RELEASE_BRANCH_REGEX
 end
 
 major, minor = release_branch_string.match(RELEASE_BRANCH_REGEX)[1..2]
-releases_branch = "origin/releases/#{major}.#{minor}"
+releases_branch = "releases/#{major}.#{minor}"
+origin_releases_branch = "origin/#{releases_branch}"
 
 GitScripts::Git.fetch_origin
 
 result = `git branch --list --remote`
   .split("\n")
   .map(&:strip)
-  .select { |item| item.start_with? releases_branch }
-  .sort do |first, other|
-    version_major, version_minor, version_patch = first.match(SEMVER_REGEX)[1]
-      .split('.')
-      .map(&:to_i)
-    other_version_major, other_version_minor, other_version_patch = other.match(SEMVER_REGEX)[1]
-      .split('.')
-      .map(&:to_i)
+  .select { |item| item.start_with? origin_releases_branch }
+  .map { |item| item.gsub("#{origin_releases_branch}.", '') }
+  .map(&:to_i)
 
-    version = SemVer.new(version_major, version_minor, version_patch)
-    other_version = SemVer.new(other_version_major, other_version_minor, other_version_patch)
+patch = Array(result).max
 
-    version <=> other_version
-  end
-
-latest_release_branch = result.last
-  .gsub('origin/', '')
+latest_release_branch = "#{releases_branch}.#{patch}"
 
 puts latest_release_branch
